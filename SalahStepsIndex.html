@@ -3,23 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Salah Audio Player</title>
+  <title>Salah Steps Audio</title>
 </head>
-<body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Arial;">
 
-  <div id="status">Loading audio...</div>
+<body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Arial;text-align:center;">
+
+  <div id="status">Loading...</div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const sound = params.get("sound");
 
     const audioMap = {
+      takbeer: "01_takbeer.mp3",
+      ruku: "02_ruku.mp3",
       sajda: "03_sajda.mp3",
-      ruku: "02_ruku.mp3"
+      tashahhud: "04_tashahhud.mp3",
+      dua: "06_dua.mp3"
     };
 
     const file = audioMap[sound];
-
     const status = document.getElementById("status");
 
     if (!file) {
@@ -40,9 +43,8 @@
         }
       });
 
-      // start playback
-      audio.play().catch(err => {
-        status.innerText = "Tap screen to play audio";
+      audio.play().catch(() => {
+        status.innerText = "Tap screen to play";
         document.body.addEventListener("click", () => audio.play(), { once: true });
       });
     }

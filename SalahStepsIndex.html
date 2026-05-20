@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Salah Audio Player</title>
+</head>
+<body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Arial;">
+
+  <div id="status">Loading audio...</div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const sound = params.get("sound");
+
+    const audioMap = {
+      sajda: "03_sajda.mp3",
+      ruku: "02_ruku.mp3"
+    };
+
+    const file = audioMap[sound];
+
+    const status = document.getElementById("status");
+
+    if (!file) {
+      status.innerText = "Invalid QR code";
+    } else {
+      status.innerText = "Playing...";
+
+      const audio = new Audio(file);
+      let count = 0;
+
+      audio.addEventListener("ended", () => {
+        count++;
+        if (count < 3) {
+          audio.currentTime = 0;
+          audio.play();
+        } else {
+          status.innerText = "Done ✔";
+        }
+      });
+
+      // start playback
+      audio.play().catch(err => {
+        status.innerText = "Tap screen to play audio";
+        document.body.addEventListener("click", () => audio.play(), { once: true });
+      });
+    }
+  </script>
+
+</body>
+</html>

@@ -1,54 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Salah Steps Audio</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Salah Trainer Pro</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.18), transparent 45%),
+    linear-gradient(to bottom, rgba(0,60,90,0.65), rgba(0,10,30,0.85)),
+    url("paradise.jpg") center/cover no-repeat fixed;
+}
+
+.tile{
+  width:92%;
+  max-width:440px;
+  padding:22px;
+  border-radius:24px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(16px);
+  box-shadow:0 12px 40px rgba(0,0,0,0.45);
+  text-align:center;
+  color:white;
+}
+
+h2{ margin:0 0 10px; }
+
+.now{
+  font-size:24px;
+  font-weight:bold;
+  padding:14px;
+  border-radius:14px;
+  margin:12px 0;
+}
+
+.glow{
+  color:#ffe66d;
+  text-shadow:0 0 12px gold;
+  transform:scale(1.05);
+}
+
+.controls button{
+  margin:4px;
+  padding:9px 12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.play{background:#4CAF50;color:white;}
+.pause{background:#ff9800;color:white;}
+.stop{background:#f44336;color:white;}
+.next{background:#9c27b0;color:white;}
+.mode{background:#ffd700;color:black;font-weight:bold;}
+
+.steps{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+
+.step{
+  padding:10px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.12);
+  cursor:pointer;
+  font-size:13px;
+}
+
+.active{
+  border:2px solid gold;
+  background:rgba(255,215,0,0.15);
+  font-weight:bold;
+}
+
+small{
+  display:block;
+  margin-top:10px;
+  opacity:0.7;
+  font-size:11px;
+}
+</style>
 </head>
 
-<body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Arial;text-align:center;">
+<body>
 
-  <div id="status">Loading...</div>
+<div class="tile">
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const sound = params.get("sound");
+<h2>🕌 Salah Trainer Pro</h2>
 
-    const audioMap = {
-      takbeer: "01_takbeer.mp3",
-      ruku: "02_ruku.mp3",
-      sajda: "03_sajda.mp3",
-      tashahhud: "04_tashahhud.mp3",
-      dua: "06_dua.mp3"
-    };
+<button class="mode" id="modeBtn" onclick="toggleMode()">👆 Manual Mode</button>
 
-    const file = audioMap[sound];
-    const status = document.getElementById("status");
+<div id="now" class="now">READY</div>
 
-    if (!file) {
-      status.innerText = "Invalid QR code";
-    } else {
-      status.innerText = "Playing...";
+<audio id="audio"></audio>
 
-      const audio = new Audio(file);
-      let count = 0;
+<div class="controls">
+  <button class="play" onclick="play()">Play</button>
+  <button class="pause" onclick="pause()">Pause</button>
+  <button class="stop" onclick="stop()">Stop</button>
+  <button class="next" onclick="next()">Next</button>
+</div>
 
-      audio.addEventListener("ended", () => {
-        count++;
-        if (count < 3) {
-          audio.currentTime = 0;
-          audio.play();
-        } else {
-          status.innerText = "Done ✔";
-        }
-      });
+<div class="steps" id="steps"></div>
 
-      audio.play().catch(() => {
-        status.innerText = "Tap screen to play";
-        document.body.addEventListener("click", () => audio.play(), { once: true });
-      });
+<small>QR: ?file=02_ruku.mp3 or ?step=ruku</small>
+
+</div>
+
+<script>
+
+/* ================= CONFIG ================= */
+
+const BASE = "https://raw.githubusercontent.com/BusyMomMH/SalahSteps/main/";
+
+const playlist = [
+  "01_takbeer.mp3",
+  "02_ruku.mp3",
+  "03_sajda.mp3",
+  "04_tashahhud.mp3",
+  "05_salam.mp3"
+];
+
+const repeatMap = {
+  ruku: 3,
+  sajda: 3,
+  salam: 2
+};
+
+/* ================= STATE ================= */
+
+let audio = document.getElementById("audio");
+let now = document.getElementById("now");
+let stepsDiv = document.getElementById("steps");
+
+let index = 0;
+let smartMode = false;
+
+let repeatKey = "";
+let repeatCount = 0;
+let repeatLimit = 1;
+
+/* ================= VOICE ================= */
+
+function speak(text){
+  if(!("speechSynthesis" in window)) return;
+  let msg = new SpeechSynthesisUtterance(text);
+  msg.rate = 0.9;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(msg);
+}
+
+/* ================= KEY ================= */
+
+function getKey(file){
+  let c = file.toLowerCase().replace(".mp3","").replace(/^\d+_?/,"");
+
+  if(c.includes("ruku")) return "ruku";
+  if(c.includes("sajda") || c.includes("sujood") || c.includes("sajdah")) return "sajda";
+  if(c.includes("salam")) return "salam";
+
+  return c;
+}
+
+/* ================= UI BUILD ================= */
+
+function build(){
+  stepsDiv.innerHTML = "";
+
+  playlist.forEach((file,i)=>{
+    let div = document.createElement("div");
+    div.className = "step";
+    div.innerText = file.replace(".mp3","").replace(/^\d+_/,"").toUpperCase();
+
+    div.onclick = ()=> playManual(i);
+
+    stepsDiv.appendChild(div);
+  });
+}
+
+/* ================= LOAD STEP ================= */
+
+function loadStep(i){
+  index = i;
+
+  let file = playlist[i];
+  audio.src = BASE + file;
+
+  repeatKey = getKey(file);
+  repeatLimit = repeatMap[repeatKey] || 1;
+  repeatCount = 0;
+
+  updateUI(file);
+
+  speak("Now go to " + repeatKey);
+
+  audio.play();
+}
+
+/* ================= UI ================= */
+
+function updateUI(file){
+  let name = file.replace(".mp3","").replace(/^\d+_/,"").toUpperCase();
+
+  now.innerText = name;
+  now.classList.add("glow");
+  setTimeout(()=>now.classList.remove("glow"),800);
+
+  document.querySelectorAll(".step").forEach((s,i)=>{
+    s.classList.toggle("active", i===index);
+  });
+}
+
+/* ================= CONTROLS ================= */
+
+function play(){ audio.play(); }
+function pause(){ audio.pause(); }
+function stop(){ audio.pause(); audio.currentTime = 0; }
+
+function next(){
+  index++;
+  if(index >= playlist.length) index = 0;
+  loadStep(index);
+}
+
+/* ================= MANUAL MODE ================= */
+
+function playManual(i){
+  smartMode = false;
+  document.getElementById("modeBtn").innerText = "👆 Manual Mode";
+  loadStep(i);
+}
+
+/* ================= SMART MODE ================= */
+
+function toggleMode(){
+  smartMode = !smartMode;
+
+  document.getElementById("modeBtn").innerText =
+    smartMode ? "🧠 Smart Mode ON" : "👆 Manual Mode";
+
+  if(smartMode){
+    loadStep(index);
+  }
+}
+
+/* ================= REPEAT ENGINE ================= */
+
+audio.addEventListener("ended", ()=>{
+
+  if(repeatCount < repeatLimit - 1){
+    repeatCount++;
+    audio.currentTime = 0;
+    audio.play();
+    return;
+  }
+
+  repeatCount = 0;
+
+  if(smartMode){
+    index++;
+
+    if(index >= playlist.length){
+      smartMode = false;
+      document.getElementById("modeBtn").innerText = "👆 Manual Mode";
+      return;
     }
-  </script>
+
+    loadStep(index);
+  }
+});
+
+/* ================= URL SUPPORT ================= */
+
+function init(){
+  let p = new URLSearchParams(location.search);
+  let file = p.get("file");
+
+  if(file){
+    let i = playlist.indexOf(file);
+    if(i !== -1) index = i;
+  }
+
+  build();
+  loadStep(index);
+}
+
+init();
+
+</script>
 
 </body>
 </html>

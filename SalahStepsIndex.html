@@ -4,143 +4,191 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<title>Salah Trainer Pro</title>
+<title>Salah Trainer Kids</title>
 
 <style>
+
 *{
     box-sizing:border-box;
     margin:0;
     padding:0;
-    font-family:Arial, sans-serif;
+    font-family:'Arial Rounded MT Bold',sans-serif;
 }
 
 body{
-    background:#0f172a;
-    color:white;
     min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+    background:
+    linear-gradient(135deg,#0f172a,#1e1b4b,#312e81);
+    overflow-x:hidden;
+    color:white;
     padding:20px;
 }
 
+.bg-bubbles{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    z-index:-1;
+}
+
+.bubble{
+    position:absolute;
+    border-radius:50%;
+    background:rgba(255,255,255,0.08);
+    animation:float 12s infinite linear;
+}
+
+@keyframes float{
+    from{
+        transform:translateY(100vh) scale(0.8);
+    }
+    to{
+        transform:translateY(-120vh) scale(1.2);
+    }
+}
+
 .container{
-    width:100%;
-    max-width:500px;
+    max-width:650px;
+    margin:auto;
 }
 
 .title{
     text-align:center;
-    font-size:2rem;
+    font-size:2.3rem;
     font-weight:bold;
-    margin-bottom:20px;
+    margin-bottom:10px;
+    animation:pulse 2s infinite;
+}
+
+.subtitle{
+    text-align:center;
+    color:#cbd5e1;
+    margin-bottom:25px;
+}
+
+@keyframes pulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.03);}
+    100%{transform:scale(1);}
 }
 
 .grid{
     display:grid;
-    grid-template-columns:1fr;
-    gap:14px;
+    gap:18px;
 }
 
 .tile{
-    background:#1e293b;
-    border-radius:18px;
-    padding:18px;
-    cursor:pointer;
-    transition:0.25s;
-    border:2px solid transparent;
     position:relative;
     overflow:hidden;
+    border-radius:24px;
+    padding:24px;
+    cursor:pointer;
+    transition:0.3s;
+    border:3px solid transparent;
+    backdrop-filter:blur(8px);
 }
 
 .tile:hover{
-    transform:translateY(-2px);
-    border-color:#38bdf8;
-    box-shadow:0 0 18px rgba(56,189,248,0.5);
+    transform:translateY(-5px) scale(1.02);
 }
 
 .tile.active{
-    border-color:#22c55e;
-    box-shadow:0 0 22px rgba(34,197,94,0.7);
+    border-color:white;
+    box-shadow:0 0 25px rgba(255,255,255,0.7);
 }
 
-.tile-title{
-    font-size:1.15rem;
-    font-weight:bold;
+.tile::before{
+    content:"";
+    position:absolute;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    top:-50px;
+    right:-50px;
+    background:rgba(255,255,255,0.18);
 }
 
-.tile-sub{
-    margin-top:6px;
-    color:#cbd5e1;
-    font-size:0.92rem;
+.tile h2{
+    font-size:1.4rem;
+    margin-bottom:8px;
+    position:relative;
+}
+
+.tile p{
+    position:relative;
+    color:#f1f5f9;
+    font-size:1rem;
 }
 
 .controls{
-    margin-top:24px;
-    display:flex;
-    gap:10px;
+    margin-top:28px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
 }
 
 button{
-    flex:1;
-    padding:14px;
     border:none;
-    border-radius:14px;
-    background:#2563eb;
-    color:white;
+    border-radius:18px;
+    padding:16px;
     font-size:1rem;
+    font-weight:bold;
+    color:white;
     cursor:pointer;
     transition:0.2s;
 }
 
 button:hover{
-    background:#1d4ed8;
+    transform:scale(1.05);
 }
 
+.playBtn{background:#22c55e;}
+.pauseBtn{background:#eab308;}
+.stopBtn{background:#ef4444;}
+.loopBtn{background:#3b82f6;}
+
 .status{
-    margin-top:18px;
+    margin-top:20px;
     text-align:center;
-    color:#94a3b8;
-    font-size:0.95rem;
+    font-size:1rem;
+    color:#f8fafc;
 }
 
 .footer{
-    margin-top:16px;
     text-align:center;
-    color:#64748b;
-    font-size:0.8rem;
-}
-
-.glow{
-    position:absolute;
-    width:120px;
-    height:120px;
-    background:rgba(56,189,248,0.15);
-    border-radius:50%;
-    top:-40px;
-    right:-30px;
+    margin-top:16px;
+    color:#cbd5e1;
+    font-size:0.9rem;
 }
 
 audio{
     display:none;
 }
+
 </style>
 </head>
 
 <body>
 
+<div class="bg-bubbles"></div>
+
 <div class="container">
 
     <div class="title">
-        Salah Trainer Pro
+        ✨ Salah Trainer Kids ✨
+    </div>
+
+    <div class="subtitle">
+        Scan QR • Tap Tile • Learn Salah
     </div>
 
     <div class="grid" id="tiles"></div>
 
     <div class="controls">
-        <button onclick="playAudio()">Play</button>
-        <button onclick="pauseAudio()">Pause</button>
-        <button onclick="stopAudio()">Stop</button>
+        <button class="playBtn" onclick="playAudio()">▶ Play</button>
+        <button class="pauseBtn" onclick="pauseAudio()">⏸ Pause</button>
+        <button class="stopBtn" onclick="stopAudio()">⏹ Stop</button>
+        <button class="loopBtn" onclick="toggleLoop()">🔁 Loop: OFF</button>
     </div>
 
     <div class="status" id="status">
@@ -148,7 +196,7 @@ audio{
     </div>
 
     <div class="footer">
-        Scan QR → Opens audio automatically
+        Audio auto-starts after QR scan
     </div>
 
 </div>
@@ -160,164 +208,281 @@ audio{
 const tracks = [
 
 {
-    title:"1. Takbeer",
+    title:"🌟 Takbeer",
     subtitle:"Allahu Akbar",
-    file:"01_takbeer.mp3"
+    file:"01_takbeer.mp3",
+    color:"linear-gradient(135deg,#f97316,#fb7185)",
+    repeat:1
 },
 
 {
-    title:"2. Ruku",
-    subtitle:"Subhana Rabbiyal Adheem",
-    file:"02_ruku.mp3"
+    title:"💜 Ruku",
+    subtitle:"Repeat 3 Times",
+    file:"02_ruku.mp3",
+    color:"linear-gradient(135deg,#8b5cf6,#6366f1)",
+    repeat:3
 },
 
 {
-    title:"3. Sujood",
-    subtitle:"Subhana Rabbiyal A'la",
-    file:"03_sajda.mp3"
+    title:"💚 Sajda",
+    subtitle:"Repeat 3 Times",
+    file:"03_sajda.mp3",
+    color:"linear-gradient(135deg,#10b981,#14b8a6)",
+    repeat:3
 },
 
 {
-    title:"4. Tashahhud",
-    subtitle:"Finger raised",
-    file:"04_tashahhud.mp3"
+    title:"☀️ Tashahhud",
+    subtitle:"Finger Raised",
+    file:"04_tashahhud.mp3",
+    color:"linear-gradient(135deg,#f59e0b,#f97316)",
+    repeat:1
 },
 
 {
-    title:"5. Salam",
+    title:"🌈 Salam",
     subtitle:"Assalamu Alaikum",
-    file:"05_salam.mp3"
+    file:"05_salam.mp3",
+    color:"linear-gradient(135deg,#ec4899,#8b5cf6)",
+    repeat:1
 },
 
 {
-    title:"6. Dua",
+    title:"🤲 Dua",
     subtitle:"Final Dua",
-    file:"06_dua.mp3"
+    file:"06_dua.mp3",
+    color:"linear-gradient(135deg,#06b6d4,#3b82f6)",
+    repeat:1
 }
 
 ];
 
-const tilesContainer = document.getElementById("tiles");
-const audio = document.getElementById("audio");
-const statusText = document.getElementById("status");
+const tilesContainer=document.getElementById("tiles");
+const audio=document.getElementById("audio");
+const statusText=document.getElementById("status");
 
-let currentTrack = null;
+let currentTrack=null;
+let loopMode=false;
+let repeatCount=0;
 
 tracks.forEach((track,index)=>{
 
-    const tile = document.createElement("div");
-    tile.className = "tile";
+    const tile=document.createElement("div");
 
-    tile.innerHTML = `
-        <div class="glow"></div>
-        <div class="tile-title">${track.title}</div>
-        <div class="tile-sub">${track.subtitle}</div>
+    tile.className="tile";
+
+    tile.style.background=track.color;
+
+    tile.innerHTML=`
+        <h2>${track.title}</h2>
+        <p>${track.subtitle}</p>
     `;
 
-    tile.onclick = ()=>{
-        loadTrack(track.file,tile,track.title,true);
+    tile.onclick=()=>{
+
+        loadTrack(track,index,true);
+
     };
 
     tilesContainer.appendChild(tile);
+
 });
 
 function clearActive(){
-    document.querySelectorAll(".tile").forEach(t=>{
-        t.classList.remove("active");
+
+    document.querySelectorAll(".tile").forEach(tile=>{
+        tile.classList.remove("active");
     });
+
 }
 
-function loadTrack(file,tile,title,autoplay=false){
+function loadTrack(track,index,autoplay=false){
 
     clearActive();
 
-    if(tile){
-        tile.classList.add("active");
-    }
+    document.querySelectorAll(".tile")[index]
+    .classList.add("active");
 
-    currentTrack = file;
+    currentTrack=track;
 
-    audio.src = file + "?v=" + Date.now();
+    repeatCount=0;
 
-    statusText.innerText = "LOADED: " + title;
+    audio.src=track.file + "?v=" + Date.now();
 
     audio.load();
 
+    statusText.innerHTML=
+    "Loaded: " + track.title;
+
     if(autoplay){
 
-        const playPromise = audio.play();
+        const p=audio.play();
 
-        if(playPromise !== undefined){
-            playPromise
-            .then(()=>{
-                statusText.innerText = "PLAYING: " + title;
-            })
-            .catch(()=>{
-                statusText.innerText = "Tap PLAY if autoplay blocked";
+        if(p!==undefined){
+
+            p.then(()=>{
+
+                statusText.innerHTML=
+                "Playing: " + track.title;
+
+            }).catch(()=>{
+
+                statusText.innerHTML=
+                "Tap PLAY to start";
+
             });
+
         }
+
     }
+
 }
+
+audio.addEventListener("ended",()=>{
+
+    if(!currentTrack) return;
+
+    if(repeatCount < currentTrack.repeat - 1){
+
+        repeatCount++;
+
+        audio.currentTime=0;
+
+        audio.play();
+
+        statusText.innerHTML=
+        currentTrack.title +
+        " • Repeat " +
+        (repeatCount+1) +
+        "/" +
+        currentTrack.repeat;
+
+        return;
+
+    }
+
+    if(loopMode){
+
+        repeatCount=0;
+
+        audio.currentTime=0;
+
+        audio.play();
+
+        statusText.innerHTML=
+        "Looping: " + currentTrack.title;
+
+    }
+
+});
 
 function playAudio(){
 
     if(!currentTrack){
-        statusText.innerText = "Select a step first";
+
+        statusText.innerHTML=
+        "Select a Salah step";
+
         return;
     }
 
     audio.play();
 
-    statusText.innerText = "PLAYING";
 }
 
 function pauseAudio(){
+
     audio.pause();
-    statusText.innerText = "PAUSED";
+
+    statusText.innerHTML="Paused";
+
 }
 
 function stopAudio(){
+
     audio.pause();
-    audio.currentTime = 0;
-    statusText.innerText = "STOPPED";
+
+    audio.currentTime=0;
+
+    repeatCount=0;
+
+    statusText.innerHTML="Stopped";
+
+}
+
+function toggleLoop(){
+
+    loopMode=!loopMode;
+
+    document.querySelector(".loopBtn")
+    .innerHTML=
+    loopMode
+    ? "🔁 Loop: ON"
+    : "🔁 Loop: OFF";
+
 }
 
 function preloadAll(){
 
     tracks.forEach(track=>{
-        const a = new Audio();
-        a.src = track.file;
-        a.preload = "auto";
+
+        const a=new Audio();
+
+        a.src=track.file;
+
+        a.preload="auto";
+
     });
+
 }
 
 preloadAll();
 
-const params = new URLSearchParams(window.location.search);
+for(let i=0;i<18;i++){
 
-const audioParam = params.get("audio");
+    const bubble=document.createElement("div");
+
+    bubble.className="bubble";
+
+    bubble.style.left=Math.random()*100+"vw";
+
+    bubble.style.width=
+    bubble.style.height=
+    (30+Math.random()*80)+"px";
+
+    bubble.style.animationDuration=
+    (8+Math.random()*10)+"s";
+
+    bubble.style.opacity=Math.random();
+
+    document.querySelector(".bg-bubbles")
+    .appendChild(bubble);
+
+}
+
+const params=
+new URLSearchParams(window.location.search);
+
+const audioParam=params.get("audio");
 
 if(audioParam){
 
-    const found = tracks.find(t=>t.file === audioParam);
+    const found=
+    tracks.find(t=>t.file===audioParam);
 
     if(found){
 
+        const idx=
+        tracks.findIndex(t=>t.file===audioParam);
+
         setTimeout(()=>{
 
-            const tileList = document.querySelectorAll(".tile");
+            loadTrack(found,idx,true);
 
-            const idx = tracks.findIndex(t=>t.file === audioParam);
+        },600);
 
-            loadTrack(
-                found.file,
-                tileList[idx],
-                found.title,
-                true
-            );
-
-        },500);
     }
+
 }
 
 </script>

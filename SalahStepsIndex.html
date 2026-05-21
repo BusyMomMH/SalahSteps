@@ -3,299 +3,322 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
 <title>Salah Trainer Pro</title>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial, sans-serif;
+}
 
-  background:
-    radial-gradient(circle at top, rgba(255,255,255,0.18), transparent 45%),
-    linear-gradient(to bottom, rgba(0,60,90,0.65), rgba(0,10,30,0.85)),
-    url("paradise.jpg") center/cover no-repeat fixed;
+body{
+    background:#0f172a;
+    color:white;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:500px;
+}
+
+.title{
+    text-align:center;
+    font-size:2rem;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:14px;
 }
 
 .tile{
-  width:92%;
-  max-width:440px;
-  padding:22px;
-  border-radius:24px;
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(16px);
-  box-shadow:0 12px 40px rgba(0,0,0,0.45);
-  text-align:center;
-  color:white;
+    background:#1e293b;
+    border-radius:18px;
+    padding:18px;
+    cursor:pointer;
+    transition:0.25s;
+    border:2px solid transparent;
+    position:relative;
+    overflow:hidden;
 }
 
-h2{ margin:0 0 10px; }
+.tile:hover{
+    transform:translateY(-2px);
+    border-color:#38bdf8;
+    box-shadow:0 0 18px rgba(56,189,248,0.5);
+}
 
-.now{
-  font-size:24px;
-  font-weight:bold;
-  padding:14px;
-  border-radius:14px;
-  margin:12px 0;
+.tile.active{
+    border-color:#22c55e;
+    box-shadow:0 0 22px rgba(34,197,94,0.7);
+}
+
+.tile-title{
+    font-size:1.15rem;
+    font-weight:bold;
+}
+
+.tile-sub{
+    margin-top:6px;
+    color:#cbd5e1;
+    font-size:0.92rem;
+}
+
+.controls{
+    margin-top:24px;
+    display:flex;
+    gap:10px;
+}
+
+button{
+    flex:1;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:#2563eb;
+    color:white;
+    font-size:1rem;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+.status{
+    margin-top:18px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:0.95rem;
+}
+
+.footer{
+    margin-top:16px;
+    text-align:center;
+    color:#64748b;
+    font-size:0.8rem;
 }
 
 .glow{
-  color:#ffe66d;
-  text-shadow:0 0 12px gold;
-  transform:scale(1.05);
+    position:absolute;
+    width:120px;
+    height:120px;
+    background:rgba(56,189,248,0.15);
+    border-radius:50%;
+    top:-40px;
+    right:-30px;
 }
 
-.controls button{
-  margin:4px;
-  padding:9px 12px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-}
-
-.play{background:#4CAF50;color:white;}
-.pause{background:#ff9800;color:white;}
-.stop{background:#f44336;color:white;}
-.next{background:#9c27b0;color:white;}
-.mode{background:#ffd700;color:black;font-weight:bold;}
-
-.steps{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:12px;
-}
-
-.step{
-  padding:10px;
-  border-radius:12px;
-  background:rgba(255,255,255,0.12);
-  cursor:pointer;
-  font-size:13px;
-}
-
-.active{
-  border:2px solid gold;
-  background:rgba(255,215,0,0.15);
-  font-weight:bold;
-}
-
-small{
-  display:block;
-  margin-top:10px;
-  opacity:0.7;
-  font-size:11px;
+audio{
+    display:none;
 }
 </style>
 </head>
 
 <body>
 
-<div class="tile">
+<div class="container">
 
-<h2>🕌 Salah Trainer Pro</h2>
+    <div class="title">
+        Salah Trainer Pro
+    </div>
 
-<button class="mode" id="modeBtn" onclick="toggleMode()">👆 Manual Mode</button>
+    <div class="grid" id="tiles"></div>
 
-<div id="now" class="now">READY</div>
+    <div class="controls">
+        <button onclick="playAudio()">Play</button>
+        <button onclick="pauseAudio()">Pause</button>
+        <button onclick="stopAudio()">Stop</button>
+    </div>
 
-<audio id="audio"></audio>
+    <div class="status" id="status">
+        READY
+    </div>
 
-<div class="controls">
-  <button class="play" onclick="play()">Play</button>
-  <button class="pause" onclick="pause()">Pause</button>
-  <button class="stop" onclick="stop()">Stop</button>
-  <button class="next" onclick="next()">Next</button>
+    <div class="footer">
+        Scan QR → Opens audio automatically
+    </div>
+
 </div>
 
-<div class="steps" id="steps"></div>
-
-<small>QR: ?file=02_ruku.mp3 or ?step=ruku</small>
-
-</div>
+<audio id="audio" playsinline preload="auto"></audio>
 
 <script>
 
-/* ================= CONFIG ================= */
+const tracks = [
 
-const BASE = "https://raw.githubusercontent.com/BusyMomMH/SalahSteps/main/";
+{
+    title:"1. Takbeer",
+    subtitle:"Allahu Akbar",
+    file:"01_takbeer.mp3"
+},
 
-const playlist = [
-  "01_takbeer.mp3",
-  "02_ruku.mp3",
-  "03_sajda.mp3",
-  "04_tashahhud.mp3",
-  "05_salam.mp3"
+{
+    title:"2. Ruku",
+    subtitle:"Subhana Rabbiyal Adheem",
+    file:"02_ruku.mp3"
+},
+
+{
+    title:"3. Sujood",
+    subtitle:"Subhana Rabbiyal A'la",
+    file:"03_sujood.mp3"
+},
+
+{
+    title:"4. Tashahhud",
+    subtitle:"Finger raised",
+    file:"04_tashahhud.mp3"
+},
+
+{
+    title:"5. Salam",
+    subtitle:"Assalamu Alaikum",
+    file:"05_salam.mp3"
+},
+
+{
+    title:"6. Dua",
+    subtitle:"Final Dua",
+    file:"06_dua.mp3"
+}
+
 ];
 
-const repeatMap = {
-  ruku: 3,
-  sajda: 3,
-  salam: 2
-};
+const tilesContainer = document.getElementById("tiles");
+const audio = document.getElementById("audio");
+const statusText = document.getElementById("status");
 
-/* ================= STATE ================= */
+let currentTrack = null;
 
-let audio = document.getElementById("audio");
-let now = document.getElementById("now");
-let stepsDiv = document.getElementById("steps");
+tracks.forEach((track,index)=>{
 
-let index = 0;
-let smartMode = false;
+    const tile = document.createElement("div");
+    tile.className = "tile";
 
-let repeatKey = "";
-let repeatCount = 0;
-let repeatLimit = 1;
+    tile.innerHTML = `
+        <div class="glow"></div>
+        <div class="tile-title">${track.title}</div>
+        <div class="tile-sub">${track.subtitle}</div>
+    `;
 
-/* ================= VOICE ================= */
+    tile.onclick = ()=>{
+        loadTrack(track.file,tile,track.title,true);
+    };
 
-function speak(text){
-  if(!("speechSynthesis" in window)) return;
-  let msg = new SpeechSynthesisUtterance(text);
-  msg.rate = 0.9;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(msg);
-}
-
-/* ================= KEY ================= */
-
-function getKey(file){
-  let c = file.toLowerCase().replace(".mp3","").replace(/^\d+_?/,"");
-
-  if(c.includes("ruku")) return "ruku";
-  if(c.includes("sajda") || c.includes("sujood") || c.includes("sajdah")) return "sajda";
-  if(c.includes("salam")) return "salam";
-
-  return c;
-}
-
-/* ================= UI BUILD ================= */
-
-function build(){
-  stepsDiv.innerHTML = "";
-
-  playlist.forEach((file,i)=>{
-    let div = document.createElement("div");
-    div.className = "step";
-    div.innerText = file.replace(".mp3","").replace(/^\d+_/,"").toUpperCase();
-
-    div.onclick = ()=> playManual(i);
-
-    stepsDiv.appendChild(div);
-  });
-}
-
-/* ================= LOAD STEP ================= */
-
-function loadStep(i){
-  index = i;
-
-  let file = playlist[i];
-  audio.src = BASE + file;
-
-  repeatKey = getKey(file);
-  repeatLimit = repeatMap[repeatKey] || 1;
-  repeatCount = 0;
-
-  updateUI(file);
-
-  speak("Now go to " + repeatKey);
-
-  audio.play();
-}
-
-/* ================= UI ================= */
-
-function updateUI(file){
-  let name = file.replace(".mp3","").replace(/^\d+_/,"").toUpperCase();
-
-  now.innerText = name;
-  now.classList.add("glow");
-  setTimeout(()=>now.classList.remove("glow"),800);
-
-  document.querySelectorAll(".step").forEach((s,i)=>{
-    s.classList.toggle("active", i===index);
-  });
-}
-
-/* ================= CONTROLS ================= */
-
-function play(){ audio.play(); }
-function pause(){ audio.pause(); }
-function stop(){ audio.pause(); audio.currentTime = 0; }
-
-function next(){
-  index++;
-  if(index >= playlist.length) index = 0;
-  loadStep(index);
-}
-
-/* ================= MANUAL MODE ================= */
-
-function playManual(i){
-  smartMode = false;
-  document.getElementById("modeBtn").innerText = "👆 Manual Mode";
-  loadStep(i);
-}
-
-/* ================= SMART MODE ================= */
-
-function toggleMode(){
-  smartMode = !smartMode;
-
-  document.getElementById("modeBtn").innerText =
-    smartMode ? "🧠 Smart Mode ON" : "👆 Manual Mode";
-
-  if(smartMode){
-    loadStep(index);
-  }
-}
-
-/* ================= REPEAT ENGINE ================= */
-
-audio.addEventListener("ended", ()=>{
-
-  if(repeatCount < repeatLimit - 1){
-    repeatCount++;
-    audio.currentTime = 0;
-    audio.play();
-    return;
-  }
-
-  repeatCount = 0;
-
-  if(smartMode){
-    index++;
-
-    if(index >= playlist.length){
-      smartMode = false;
-      document.getElementById("modeBtn").innerText = "👆 Manual Mode";
-      return;
-    }
-
-    loadStep(index);
-  }
+    tilesContainer.appendChild(tile);
 });
 
-/* ================= URL SUPPORT ================= */
-
-function init(){
-  let p = new URLSearchParams(location.search);
-  let file = p.get("file");
-
-  if(file){
-    let i = playlist.indexOf(file);
-    if(i !== -1) index = i;
-  }
-
-  build();
-  loadStep(index);
+function clearActive(){
+    document.querySelectorAll(".tile").forEach(t=>{
+        t.classList.remove("active");
+    });
 }
 
-init();
+function loadTrack(file,tile,title,autoplay=false){
+
+    clearActive();
+
+    if(tile){
+        tile.classList.add("active");
+    }
+
+    currentTrack = file;
+
+    audio.src = file + "?v=" + Date.now();
+
+    statusText.innerText = "LOADED: " + title;
+
+    audio.load();
+
+    if(autoplay){
+
+        const playPromise = audio.play();
+
+        if(playPromise !== undefined){
+            playPromise
+            .then(()=>{
+                statusText.innerText = "PLAYING: " + title;
+            })
+            .catch(()=>{
+                statusText.innerText = "Tap PLAY if autoplay blocked";
+            });
+        }
+    }
+}
+
+function playAudio(){
+
+    if(!currentTrack){
+        statusText.innerText = "Select a step first";
+        return;
+    }
+
+    audio.play();
+
+    statusText.innerText = "PLAYING";
+}
+
+function pauseAudio(){
+    audio.pause();
+    statusText.innerText = "PAUSED";
+}
+
+function stopAudio(){
+    audio.pause();
+    audio.currentTime = 0;
+    statusText.innerText = "STOPPED";
+}
+
+function preloadAll(){
+
+    tracks.forEach(track=>{
+        const a = new Audio();
+        a.src = track.file;
+        a.preload = "auto";
+    });
+}
+
+preloadAll();
+
+const params = new URLSearchParams(window.location.search);
+
+const audioParam = params.get("audio");
+
+if(audioParam){
+
+    const found = tracks.find(t=>t.file === audioParam);
+
+    if(found){
+
+        setTimeout(()=>{
+
+            const tileList = document.querySelectorAll(".tile");
+
+            const idx = tracks.findIndex(t=>t.file === audioParam);
+
+            loadTrack(
+                found.file,
+                tileList[idx],
+                found.title,
+                true
+            );
+
+        },500);
+    }
+}
 
 </script>
 

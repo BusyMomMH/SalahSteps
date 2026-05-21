@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salah Steps QR Generator</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+body{
+    font-family:Arial, sans-serif;
+    background:#f4f8ff;
+    padding:20px;
+    text-align:center;
+}
+
+h1{
+    color:#1565c0;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+    gap:20px;
+    max-width:900px;
+    margin:auto;
+}
+
+.card{
+    background:white;
+    border-radius:18px;
+    padding:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.label{
+    margin-top:10px;
+    font-size:14px;
+    font-weight:bold;
+    color:#333;
+}
+
+#printBtn{
+    margin:25px;
+    padding:12px 22px;
+    border:none;
+    border-radius:12px;
+    background:#1565c0;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+@media print{
+    #printBtn{
+        display:none;
+    }
+
+    body{
+        background:white;
+    }
+
+    .card{
+        box-shadow:none;
+        border:1px solid #ddd;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<h1>Salah Steps Small QR Codes</h1>
+
+<button id="printBtn" onclick="window.print()">
+Print QR Sheet
+</button>
+
+<div class="grid" id="grid"></div>
+
+<script>
+
+const base =
+'https://busymommh.github.io/SalahSteps/SalahStepsIndex.html?audio=';
+
+const items = [
+
+{
+name:'Takbeer',
+file:'01_takbeer.mp3'
+},
+
+{
+name:'Ruku',
+file:'02_ruku.mp3'
+},
+
+{
+name:'Sajda',
+file:'03_sajda.mp3'
+},
+
+{
+name:'Tashahhud',
+file:'04_tashahhud.mp3'
+},
+
+{
+name:'Dua',
+file:'06_dua.mp3'
+}
+
+];
+
+const grid = document.getElementById('grid');
+
+items.forEach(item=>{
+
+    const card = document.createElement('div');
+    card.className='card';
+
+    const qr = document.createElement('div');
+
+    const label = document.createElement('div');
+    label.className='label';
+    label.innerText=item.name;
+
+    card.appendChild(qr);
+    card.appendChild(label);
+
+    grid.appendChild(card);
+
+    new QRCode(qr, {
+
+        text: base + encodeURIComponent(item.file),
+
+        width: 90,
+        height: 90,
+
+        colorDark : '#000000',
+        colorLight : '#ffffff',
+
+        correctLevel : QRCode.CorrectLevel.H
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

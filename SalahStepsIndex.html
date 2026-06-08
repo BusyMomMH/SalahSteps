@@ -14,18 +14,22 @@
 }
 
 body{
-    min-height:100vh;
+    height: 100vh;
+    width: 100vw;
     background: linear-gradient(135deg,#0f172a,#1e1b4b,#312e81);
-    overflow-x:hidden;
     color:white;
-    padding:20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevents whole body scrolling so credits stay fixed */
 }
 
 .bg-bubbles{
     position:fixed;
     inset:0;
     overflow:hidden;
-    z-index:-1;
+    z-index: 1; /* Retained behind visual components */
+    pointer-events: none;
 }
 
 .bubble{
@@ -40,30 +44,58 @@ body{
     to{ transform:translateY(-120vh) scale(1.2); }
 }
 
+/* Master container matches theme layouts perfectly */
 .container{
-    max-width:650px;
-    margin:auto;
-    padding-bottom: 60px;
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.header-section {
+    flex-shrink: 0;
+    margin-bottom: 15px;
 }
 
 .title{
     text-align:center;
     font-size:2.3rem;
     font-weight:bold;
-    margin-bottom:10px;
+    margin-bottom:5px;
     animation:pulse 2s infinite;
 }
 
 .subtitle{
     text-align:center;
     color:#cbd5e1;
-    margin-bottom:25px;
+    margin-bottom:10px;
 }
 
 @keyframes pulse{
     0%{transform:scale(1);}
     50%{transform:scale(1.03);}
     100%{transform:scale(1);}
+}
+
+/* Dedicated scroll area for tiles so they don't push credits away */
+.scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+    padding-bottom: 15px;
+}
+
+/* Hide scrollbar tracks across platforms for modern TV appearance */
+.scrollable-content::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollable-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
 }
 
 .grid{
@@ -77,26 +109,25 @@ body{
     border-radius:24px;
     padding:24px;
     cursor:pointer;
-    transition:0.3s;
+    transition: 0.25s ease;
     border:3px solid transparent;
     backdrop-filter:blur(8px);
     outline: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-/* TV Focus State using native focus-visible to keep touch smart */
-.tile:focus-visible, .tile:hover{
-    transform:translateY(-5px) scale(1.02);
-    border-color: rgba(255, 255, 255, 0.5);
-}
-
-.tile:focus:not(:focus-visible) {
-    border-color: transparent;
-    transform: none;
+/* Crucial TV-focused optimization state overrides */
+.tile:focus, .tile:hover{
+    transform: translateY(-3px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
 }
 
 /* Restored exact original glowing pulse effect */
 .tile.active{
-    border-color:white;
+    border-color:white !important;
     box-shadow:0 0 25px rgba(255,255,255,0.7);
 }
 
@@ -109,23 +140,61 @@ body{
     top:-50px;
     right:-50px;
     background:rgba(255,255,255,0.18);
+    pointer-events: none;
+}
+
+.tile-content {
+    position: relative;
+    z-index: 2;
 }
 
 .tile h2{
     font-size:1.4rem;
     margin-bottom:8px;
-    position:relative;
 }
 
 .tile p{
-    position:relative;
     color:#f1f5f9;
     font-size:1rem;
 }
 
-/* Controls Grid Setup layout */
+/* Dynamic Ring Styles */
+.progress-ring-container {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    z-index: 2;
+    display: none;
+}
+
+.tile.active .progress-ring-container {
+    display: block;
+}
+
+.progress-ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.2);
+    stroke-width: 4;
+}
+
+.progress-ring-circle {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 4;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 25px 25px;
+    transition: stroke-dashoffset 0.35s;
+}
+
+/* Controls Fixed Row Layouts */
+.controls-area {
+    flex-shrink: 0;
+    background: transparent;
+    padding-top: 10px;
+}
+
 .controls{
-    margin-top:28px;
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:12px;
@@ -148,11 +217,16 @@ button{
     cursor:pointer;
     transition:0.2s;
     outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-button:focus-visible, button:hover{
+button:focus, button:hover{
     transform:scale(1.05);
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+    border: 2px solid #ffffff;
 }
 
 .playBtn{background:#22c55e;}
@@ -161,23 +235,24 @@ button:focus-visible, button:hover{
 .seqBtn{background:#8b5cf6;}
 
 .status{
-    margin-top:20px;
+    margin-top:12px;
     text-align:center;
     font-size:1rem;
     color:#f8fafc;
     min-height: 24px;
 }
 
-/* Custom Animated Credits Section */
+/* Custom Animated Fixed Credits Section */
 .credits-box {
-    margin-top: 50px;
+    margin-top: 15px;
     text-align: center;
     border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 24px;
+    padding-top: 12px;
+    flex-shrink: 0;
 }
 
 .created-by {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -185,7 +260,7 @@ button:focus-visible, button:hover{
 
 .author-name {
     display: inline-block;
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 900;
     letter-spacing: 1px;
     background: linear-gradient(to right, #f472b6, #38bdf8, #f472b6);
@@ -193,11 +268,11 @@ button:focus-visible, button:hover{
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: shine 3s linear infinite;
-    margin: 6px 0;
+    margin: 4px 0;
 }
 
 .creation-date {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #cbd5e1;
 }
 
@@ -214,21 +289,27 @@ audio{ display:none; }
 <div class="bg-bubbles"></div>
 
 <div class="container">
-    <div class="title">✨ Salah Trainer Kids ✨</div>
-    <div class="subtitle">Scan QR • Tap Tile • Learn Salah</div>
-
-    <div class="grid" id="tiles"></div>
-
-    <div class="controls">
-        <button class="playBtn" id="btn-play" onclick="playAudio()">▶ Play / Pause</button>
-        <button class="stopBtn" id="btn-stop" onclick="stopAudio()">⏹ Stop</button>
-    </div>
-    <div class="controls-row-2">
-        <button class="seqBtn" id="btn-seq" onclick="toggleSequential()">⏭ Next Step: OFF</button>
-        <button class="loopBtn" id="btn-loop" onclick="toggleLoop()">🔁 Loop: OFF</button>
+    <div class="header-section">
+        <div class="title">✨ Salah Trainer Kids ✨</div>
+       
     </div>
 
-    <div class="status" id="status">READY</div>
+    <div class="scrollable-content" id="scroll-wrapper">
+        <div class="grid" id="tiles"></div>
+    </div>
+
+    <div class="controls-area">
+        <div class="controls">
+            <button class="playBtn" id="btn-play" onclick="playAudio()">▶ Play / Pause</button>
+            <button class="stopBtn" id="btn-stop" onclick="stopAudio()">⏹ Stop</button>
+        </div>
+        <div class="controls-row-2">
+            <button class="seqBtn" id="btn-seq" onclick="toggleSequential()">⏭ Next Step: OFF</button>
+            <button class="loopBtn" id="btn-loop" onclick="toggleLoop()">🔁 Loop: OFF</button>
+        </div>
+
+        <div class="status" id="status">READY</div>
+    </div>
 
     <div class="credits-box">
         <p class="created-by">Created by</p>
@@ -240,7 +321,6 @@ audio{ display:none; }
 <audio id="audio" playsinline preload="auto"></audio>
 
 <script>
-// Restored your exact original structural colors and tracking profiles
 const tracks = [
     { title:"🌟 Takbeer", subtitle:"Allahu Akbar", file:"01_takbeer.mp3", color:"linear-gradient(135deg,#f97316,#fb7185)", repeat:1 },
     { title:"💜 Ruku", subtitle:"Repeat 3 Times", file:"02_ruku.mp3", color:"linear-gradient(135deg,#8b5cf6,#6366f1)", repeat:3 },
@@ -251,6 +331,7 @@ const tracks = [
 ];
 
 const tilesContainer = document.getElementById("tiles");
+const scrollWrapper = document.getElementById("scroll-wrapper");
 const audio = document.getElementById("audio");
 const statusText = document.getElementById("status");
 
@@ -261,7 +342,10 @@ let sequentialMode = false;
 let repeatCount = 0;
 let tvFocusIdx = -1;
 
-// 1. GENERATE TILES (WITH ORIGINAL GRADIENTS)
+const radius = 21;
+const circumference = 2 * Math.PI * radius;
+
+// 1. GENERATE TILES
 tracks.forEach((track, index) => {
     const tile = document.createElement("div");
     tile.className = "tile";
@@ -269,22 +353,59 @@ tracks.forEach((track, index) => {
     tile.style.background = track.color;
 
     tile.innerHTML = `
-        <h2>${track.title}</h2>
-        <p>${track.subtitle}</p>
+        <div class="tile-content">
+            <h2>${track.title}</h2>
+            <p>${track.subtitle}</p>
+        </div>
+        <div class="progress-ring-container">
+            <svg width="50" height="50">
+                <circle class="progress-ring-bg" cx="25" cy="25" r="${radius}"></circle>
+                <circle class="progress-ring-circle" id="ring-${index}" cx="25" cy="25" r="${radius}" 
+                    stroke-dasharray="${circumference} ${circumference}" 
+                    stroke-dashoffset="${circumference}"></circle>
+            </svg>
+        </div>
     `;
 
     tile.onclick = () => {
         tvFocusIdx = index;
         loadTrack(track, index, true);
     };
+    
+    // Synced focus indexing update
+    tile.onfocus = () => {
+        tvFocusIdx = Array.from(document.querySelectorAll('.tile, button')).indexOf(tile);
+    };
 
     tilesContainer.appendChild(tile);
+});
+
+// Setup native button listeners to keep tracking indices accurate
+document.querySelectorAll('button').forEach(btn => {
+    btn.onfocus = () => {
+        tvFocusIdx = Array.from(document.querySelectorAll('.tile, button')).indexOf(btn);
+    };
 });
 
 function clearActive() {
     document.querySelectorAll(".tile").forEach(tile => {
         tile.classList.remove("active");
     });
+    document.querySelectorAll(".progress-ring-circle").forEach(circle => {
+        circle.style.strokeDashoffset = circumference;
+    });
+}
+
+function updateProgressRing() {
+    if (currentTrackIndex === null || !currentTrack) return;
+    const circle = document.getElementById(`ring-${currentTrackIndex}`);
+    if (circle) {
+        const totalSteps = currentTrack.repeat;
+        const currentProgress = repeatCount + 1; 
+        const percentage = currentProgress / totalSteps;
+        const offset = circumference - (percentage * circumference);
+        circle.style.strokeDashoffset = offset;
+    }
 }
 
 // 4. LOAD TRACK & AUTO-SCROLL
@@ -294,7 +415,6 @@ function loadTrack(track, index, autoplay = false) {
     const activeTile = document.querySelectorAll(".tile")[index];
     if (activeTile) {
         activeTile.classList.add("active");
-        // Smoothly scroll the screen to center the active item
         activeTile.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
@@ -306,6 +426,7 @@ function loadTrack(track, index, autoplay = false) {
     audio.load();
 
     statusText.innerHTML = "Loaded: " + track.title;
+    updateProgressRing();
 
     if (autoplay) {
         const p = audio.play();
@@ -323,16 +444,15 @@ function loadTrack(track, index, autoplay = false) {
 audio.addEventListener("ended", () => {
     if (!currentTrack) return;
 
-    // A. Handle structural internal loops (e.g., 3x Sajda)
     if (repeatCount < currentTrack.repeat - 1) {
         repeatCount++;
         audio.currentTime = 0;
         audio.play();
         statusText.innerHTML = `${currentTrack.title} • Repeat ${repeatCount + 1}/${currentTrack.repeat}`;
+        updateProgressRing();
         return;
     }
 
-    // B. Handle Automatic Progression to Next Step
     if (sequentialMode) {
         let nextIndex = currentTrackIndex + 1;
         if (nextIndex < tracks.length) {
@@ -344,12 +464,12 @@ audio.addEventListener("ended", () => {
         return;
     }
 
-    // C. Handle Whole-Track Loop mode
     if (loopMode) {
         repeatCount = 0;
         audio.currentTime = 0;
         audio.play();
         statusText.innerHTML = "Looping: " + currentTrack.title;
+        updateProgressRing();
     } else {
         statusText.innerHTML = "Finished: " + currentTrack.title;
     }
@@ -395,20 +515,19 @@ function toggleSequential() {
     document.getElementById("btn-seq").innerHTML = sequentialMode ? "⏭ Next Step: ON" : "⏭ Next Step: OFF";
 }
 
-// TV REMOTE COMPATIBLE FOCUS ENGINE CONTROL LISTENER
+// ROBUST spatial key listeners for TV BRO
 document.addEventListener('keydown', (e) => {
     const focusable = Array.from(document.querySelectorAll('.tile, button'));
-    
-    if (e.key === "ArrowDown") {
+    if(focusable.length === 0) return;
+
+    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
         e.preventDefault();
         tvFocusIdx = (tvFocusIdx + 1) % focusable.length;
         focusable[tvFocusIdx].focus();
-        focusable[tvFocusIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else if (e.key === "ArrowUp") {
+    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
         e.preventDefault();
         tvFocusIdx = (tvFocusIdx - 1 + focusable.length) % focusable.length;
         focusable[tvFocusIdx].focus();
-        focusable[tvFocusIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else if (e.key === "Enter" || e.key === " ") {
         if (document.activeElement.classList.contains('tile')) {
             e.preventDefault();
@@ -418,7 +537,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// PRELOAD STABILITY
 function preloadAll() {
     tracks.forEach(track => {
         const a = new Audio();
@@ -428,7 +546,6 @@ function preloadAll() {
 }
 preloadAll();
 
-// ORIGINAL DECORATIVE BACKGROUND BUBBLES
 for(let i=0;i<18;i++){
     const bubble=document.createElement("div");
     bubble.className="bubble";
@@ -439,7 +556,6 @@ for(let i=0;i<18;i++){
     document.querySelector(".bg-bubbles").appendChild(bubble);
 }
 
-// AUTOMATIC DEEP QR CODE ROUTING & SCROLL LINK
 const params = new URLSearchParams(window.location.search);
 const audioParam = params.get("audio");
 
@@ -447,7 +563,6 @@ if(audioParam){
     const idx = tracks.findIndex(t => t.file === audioParam);
     if(idx !== -1){
         setTimeout(() => {
-            tvFocusIdx = idx;
             loadTrack(tracks[idx], idx, true);
         }, 600);
     }

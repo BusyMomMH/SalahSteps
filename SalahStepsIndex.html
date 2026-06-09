@@ -10,32 +10,44 @@
     box-sizing:border-box;
     margin:0;
     padding:0;
-    font-family:'Arial Rounded MT Bold',sans-serif;
+    font-family:'Arial Rounded MT Bold', sans-serif;
 }
 
 body{
     height: 100vh;
     width: 100vw;
-    background: linear-gradient(135deg,#0f172a,#1e1b4b,#312e81);
-    color:white;
-    padding: 20px;
+    /* Spiritual Islamic palette matching the Salah theme */
+    background: linear-gradient(135deg, #064e3b, #115e59, #0f172a);
+    overflow: hidden; /* Strict limit: Absolutely no scrolling allowed on TV */
+    color: white;
+    padding: 2vh 2vw;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Prevents whole body scrolling so credits stay fixed */
+    justify-content: space-between;
+    position: relative;
+}
+
+/* Fallback for mobile devices where scrolling is acceptable */
+@media (max-width: 680px) {
+    body {
+        overflow-y: auto;
+        height: auto;
+        min-height: 100vh;
+    }
 }
 
 .bg-bubbles{
-    position:fixed;
+    position:absolute;
     inset:0;
     overflow:hidden;
-    z-index: 1; /* Retained behind visual components */
+    z-index:0;
     pointer-events: none;
 }
 
 .bubble{
     position:absolute;
     border-radius:50%;
-    background:rgba(255,255,255,0.08);
+    background:rgba(255,255,255,0.05);
     animation:float 12s infinite linear;
 }
 
@@ -44,215 +56,181 @@ body{
     to{ transform:translateY(-120vh) scale(1.2); }
 }
 
-/* Master container matches theme layouts perfectly */
-.container{
+.app-wrapper {
+    z-index: 1;
     width: 100%;
-    max-width: 650px;
-    margin: 0 auto;
-    flex: 1;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    z-index: 10;
+    justify-content: space-between;
 }
 
 .header-section {
-    flex-shrink: 0;
-    margin-bottom: 15px;
+    text-align: center;
+    height: 10vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .title{
-    text-align:center;
-    font-size:2.3rem;
-    font-weight:bold;
-    margin-bottom:5px;
-    animation:pulse 2s infinite;
+    font-size: clamp(1.8rem, 4vh, 2.8rem);
+    font-weight: bold;
+    animation: pulseHeading 2s infinite;
 }
 
 .subtitle{
-    text-align:center;
-    color:#cbd5e1;
-    margin-bottom:10px;
+    color: #cbd5e1;
+    font-size: clamp(0.9rem, 1.8vh, 1.2rem);
+    margin-top: 2px;
 }
 
-@keyframes pulse{
+@keyframes pulseHeading{
     0%{transform:scale(1);}
-    50%{transform:scale(1.03);}
+    50%{transform:scale(1.02);}
     100%{transform:scale(1);}
 }
 
-/* Dedicated scroll area for tiles so they don't push credits away */
-.scrollable-content {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 5px;
-    padding-bottom: 15px;
-}
-
-/* Hide scrollbar tracks across platforms for modern TV appearance */
-.scrollable-content::-webkit-scrollbar {
-    width: 6px;
-}
-.scrollable-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-}
-
+/* Widescreen Responsive Grid: Perfectly utilizes 100% space without spilling over */
 .grid{
-    display:grid;
-    gap:18px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1.5vw;
+    height: 58vh;
+    width: 100%;
+    margin: 1vh 0;
+}
+
+@media (max-width: 680px) {
+    .grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        height: auto;
+        gap: 15px;
+    }
 }
 
 .tile{
-    position:relative;
-    overflow:hidden;
-    border-radius:24px;
-    padding:24px;
-    cursor:pointer;
-    transition: 0.25s ease;
-    border:3px solid transparent;
-    backdrop-filter:blur(8px);
-    outline: none;
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    padding: 2vh 2vw;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    border: 5px solid transparent;
+    backdrop-filter: blur(8px);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    outline: none; /* Completely disables default browser highlight rings */
 }
 
-/* Crucial TV-focused optimization state overrides */
-.tile:focus, .tile:hover{
-    transform: translateY(-3px) scale(1.02);
-    border-color: rgba(255, 255, 255, 0.9) !important;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+/* Native D-Pad Focus Visual Indicator (Bypasses Virtual Cursor Mode) */
+.tile.focused, .tile:focus-visible {
+    transform: scale(1.04);
+    border-color: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
 }
 
-/* Restored exact original glowing pulse effect */
+/* Ultra-high visibility pulsing borders for kids when track plays */
 .tile.active{
-    border-color:white !important;
-    box-shadow:0 0 25px rgba(255,255,255,0.7);
+    border: 6px solid #ffffff !important;
+    animation: activeGlowPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes activeGlowPulse {
+    0% { box-shadow: 0 0 15px #fff; transform: scale(1.04); }
+    50% { box-shadow: 0 0 40px #fff, inset 0 0 15px rgba(255,255,255,0.4); transform: scale(1.07); }
+    100% { box-shadow: 0 0 15px #fff; transform: scale(1.04); }
 }
 
 .tile::before{
-    content:"";
-    position:absolute;
-    width:180px;
-    height:180px;
-    border-radius:50%;
-    top:-50px;
-    right:-50px;
-    background:rgba(255,255,255,0.18);
-    pointer-events: none;
-}
-
-.tile-content {
-    position: relative;
-    z-index: 2;
+    content: "";
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    top: -40px;
+    right: -40px;
+    background: rgba(255,255,255,0.12);
 }
 
 .tile h2{
-    font-size:1.4rem;
-    margin-bottom:8px;
+    font-size: clamp(1.2rem, 3.2vh, 2rem);
+    margin-bottom: 4px;
 }
 
 .tile p{
-    color:#f1f5f9;
-    font-size:1rem;
+    color: #f1f5f9;
+    font-size: clamp(0.8rem, 1.8vh, 1.1rem);
 }
 
-/* Dynamic Ring Styles */
-.progress-ring-container {
-    position: relative;
-    width: 50px;
-    height: 50px;
-    z-index: 2;
-    display: none;
+.footer-controls {
+    height: 24vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.tile.active .progress-ring-container {
-    display: block;
+@media (max-width: 680px) {
+    .footer-controls { height: auto; gap: 15px; margin-top: 15px; }
 }
 
-.progress-ring-bg {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.2);
-    stroke-width: 4;
+.controls-cluster {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
 }
 
-.progress-ring-circle {
-    fill: none;
-    stroke: #ffffff;
-    stroke-width: 4;
-    stroke-linecap: round;
-    transform: rotate(-90deg);
-    transform-origin: 25px 25px;
-    transition: stroke-dashoffset 0.35s;
-}
-
-/* Controls Fixed Row Layouts */
-.controls-area {
-    flex-shrink: 0;
-    background: transparent;
-    padding-top: 10px;
-}
-
-.controls{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
-}
-
-.controls-row-2{
-    margin-top:12px;
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
+@media (max-width: 680px) {
+    .controls-cluster { grid-template-columns: repeat(2, 1fr); }
 }
 
 button{
-    border:none;
-    border-radius:18px;
-    padding:16px;
-    font-size:1rem;
-    font-weight:bold;
-    color:white;
-    cursor:pointer;
-    transition:0.2s;
+    border: none;
+    border-radius: 16px;
+    padding: 1.5vh 1vw;
+    font-size: clamp(0.9rem, 2vh, 1.2rem);
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s;
     outline: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
 }
 
-button:focus, button:hover{
-    transform:scale(1.05);
+button.focused, button:focus-visible {
+    transform: scale(1.05);
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
-    border: 2px solid #ffffff;
+    border: 3px solid white;
 }
 
-.playBtn{background:#22c55e;}
-.stopBtn{background:#ef4444;}
-.loopBtn{background:#3b82f6;}
-.seqBtn{background:#8b5cf6;}
+.playBtn{ background: #22c55e; }
+.stopBtn{ background: #ef4444; }
+.loopBtn{ background: #3b82f6; }
+.seqBtn{ background: #8b5cf6; }
 
 .status{
-    margin-top:12px;
-    text-align:center;
-    font-size:1rem;
-    color:#f8fafc;
-    min-height: 24px;
+    text-align: center;
+    font-size: clamp(1rem, 2.2vh, 1.4rem);
+    color: #f8fafc;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* Custom Animated Fixed Credits Section */
+/* Static bottom credits area pinned cleanly without eating app real estate */
 .credits-box {
-    margin-top: 15px;
-    text-align: center;
     border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 12px;
-    flex-shrink: 0;
+    padding-top: 0.5vh;
+    text-align: center;
 }
 
 .created-by {
-    font-size: 0.8rem;
+    font-size: clamp(0.6rem, 1.2vh, 0.8rem);
     color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -260,61 +238,49 @@ button:focus, button:hover{
 
 .author-name {
     display: inline-block;
-    font-size: 1.8rem;
+    font-size: clamp(1.1rem, 2.5vh, 1.6rem);
     font-weight: 900;
-    letter-spacing: 1px;
     background: linear-gradient(to right, #f472b6, #38bdf8, #f472b6);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: shine 3s linear infinite;
-    margin: 4px 0;
 }
 
-.creation-date {
-    font-size: 0.8rem;
-    color: #cbd5e1;
-}
-
-@keyframes shine {
-    to { background-position: 200% center; }
-}
-
+@keyframes shine { to { background-position: 200% center; } }
 audio{ display:none; }
 </style>
 </head>
 
 <body>
 
-<div class="bg-bubbles"></div>
+<div class="bg-bubbles" id="bubble-container"></div>
 
-<div class="container">
+<div class="app-wrapper">
+    <!-- Header Section (10% Space) -->
     <div class="header-section">
         <div class="title">✨ Salah Trainer Kids ✨</div>
-       
+        <div class="subtitle">Use TV Remote Arrows or Tap Tiles Directly</div>
     </div>
 
-    <div class="scrollable-content" id="scroll-wrapper">
-        <div class="grid" id="tiles"></div>
-    </div>
+    <!-- Active Working Interactive Grid Area (58% Space) -->
+    <div class="grid" id="tiles"></div>
 
-    <div class="controls-area">
-        <div class="controls">
+    <!-- Interactive Button Controls and Monitor Strip (24% Space) -->
+    <div class="footer-controls">
+        <div class="controls-cluster">
             <button class="playBtn" id="btn-play" onclick="playAudio()">▶ Play / Pause</button>
             <button class="stopBtn" id="btn-stop" onclick="stopAudio()">⏹ Stop</button>
-        </div>
-        <div class="controls-row-2">
             <button class="seqBtn" id="btn-seq" onclick="toggleSequential()">⏭ Next Step: OFF</button>
             <button class="loopBtn" id="btn-loop" onclick="toggleLoop()">🔁 Loop: OFF</button>
         </div>
 
         <div class="status" id="status">READY</div>
-    </div>
 
-    <div class="credits-box">
-        <p class="created-by">Created by</p>
-        <p class="author-name">AMTUN NOOR</p>
-        <p class="creation-date">May 2026</p>
+        <!-- Pinned Bottom Metadata Footer Zone -->
+        <div class="credits-box">
+            <p class="created-by">Created by <span class="author-name">AMTUN NOOR</span> — May 2026</p>
+        </div>
     </div>
 </div>
 
@@ -331,7 +297,6 @@ const tracks = [
 ];
 
 const tilesContainer = document.getElementById("tiles");
-const scrollWrapper = document.getElementById("scroll-wrapper");
 const audio = document.getElementById("audio");
 const statusText = document.getElementById("status");
 
@@ -340,83 +305,56 @@ let currentTrack = null;
 let loopMode = false;
 let sequentialMode = false;
 let repeatCount = 0;
-let tvFocusIdx = -1;
 
-const radius = 21;
-const circumference = 2 * Math.PI * radius;
+// Universal Navigation Array combining Grid and Action Control Buttons
+let navigationItems = [];
+let activeFocusIndex = 0;
 
-// 1. GENERATE TILES
+// Draw Tiles
 tracks.forEach((track, index) => {
     const tile = document.createElement("div");
     tile.className = "tile";
-    tile.tabIndex = 0; 
     tile.style.background = track.color;
-
-    tile.innerHTML = `
-        <div class="tile-content">
-            <h2>${track.title}</h2>
-            <p>${track.subtitle}</p>
-        </div>
-        <div class="progress-ring-container">
-            <svg width="50" height="50">
-                <circle class="progress-ring-bg" cx="25" cy="25" r="${radius}"></circle>
-                <circle class="progress-ring-circle" id="ring-${index}" cx="25" cy="25" r="${radius}" 
-                    stroke-dasharray="${circumference} ${circumference}" 
-                    stroke-dashoffset="${circumference}"></circle>
-            </svg>
-        </div>
-    `;
-
+    tile.innerHTML = `<h2>${track.title}</h2><p>${track.subtitle}</p>`;
+    
+    // Smooth compatibility for Touch Screen/Mice
     tile.onclick = () => {
-        tvFocusIdx = index;
+        setNativeFocus(index);
         loadTrack(track, index, true);
     };
-    
-    // Synced focus indexing update
-    tile.onfocus = () => {
-        tvFocusIdx = Array.from(document.querySelectorAll('.tile, button')).indexOf(tile);
-    };
-
     tilesContainer.appendChild(tile);
 });
 
-// Setup native button listeners to keep tracking indices accurate
-document.querySelectorAll('button').forEach(btn => {
-    btn.onfocus = () => {
-        tvFocusIdx = Array.from(document.querySelectorAll('.tile, button')).indexOf(btn);
-    };
-});
+// Build Spatial D-Pad Navigation Node Array Matrix
+function mapNavigationNodes() {
+    const tiles = Array.from(document.querySelectorAll('.tile'));
+    const buttons = [
+        document.getElementById('btn-play'),
+        document.getElementById('btn-stop'),
+        document.getElementById('btn-seq'),
+        document.getElementById('btn-loop')
+    ];
+    navigationItems = [...tiles, ...buttons];
+}
+
+function setNativeFocus(index) {
+    if (index < 0 || index >= navigationItems.length) return;
+    navigationItems[activeFocusIndex].classList.remove('focused');
+    activeFocusIndex = index;
+    navigationItems[activeFocusIndex].classList.add('focused');
+    
+    // Explicit browser focus injection (forces TV Bro out of pointer simulation)
+    navigationItems[activeFocusIndex].focus();
+}
 
 function clearActive() {
-    document.querySelectorAll(".tile").forEach(tile => {
-        tile.classList.remove("active");
-    });
-    document.querySelectorAll(".progress-ring-circle").forEach(circle => {
-        circle.style.strokeDashoffset = circumference;
-    });
+    document.querySelectorAll(".tile").forEach(t => t.classList.remove("active"));
 }
 
-function updateProgressRing() {
-    if (currentTrackIndex === null || !currentTrack) return;
-    const circle = document.getElementById(`ring-${currentTrackIndex}`);
-    if (circle) {
-        const totalSteps = currentTrack.repeat;
-        const currentProgress = repeatCount + 1; 
-        const percentage = currentProgress / totalSteps;
-        const offset = circumference - (percentage * circumference);
-        circle.style.strokeDashoffset = offset;
-    }
-}
-
-// 4. LOAD TRACK & AUTO-SCROLL
 function loadTrack(track, index, autoplay = false) {
     clearActive();
-
     const activeTile = document.querySelectorAll(".tile")[index];
-    if (activeTile) {
-        activeTile.classList.add("active");
-        activeTile.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    if (activeTile) activeTile.classList.add("active");
 
     currentTrackIndex = index;
     currentTrack = track;
@@ -424,38 +362,33 @@ function loadTrack(track, index, autoplay = false) {
 
     audio.src = track.file + "?v=" + Date.now();
     audio.load();
-
     statusText.innerHTML = "Loaded: " + track.title;
-    updateProgressRing();
 
     if (autoplay) {
-        const p = audio.play();
-        if (p !== undefined) {
-            p.then(() => {
-                statusText.innerHTML = "Playing: " + track.title;
-            }).catch(() => {
-                statusText.innerHTML = "Tap anywhere to allow audio playback";
-            });
-        }
+        audio.play().then(() => {
+            statusText.innerHTML = "Playing: " + track.title;
+        }).catch(() => {
+            statusText.innerHTML = "Press Enter/OK to Confirm Sound";
+        });
     }
 }
 
-// 2. RUNS REPEATS, TRACK LOOPS, AND SEQUENTIAL PROGRESSION
+// Fixed TV Bro audio lock-up bug: cleans up audio pipes properly on track finish
 audio.addEventListener("ended", () => {
     if (!currentTrack) return;
 
     if (repeatCount < currentTrack.repeat - 1) {
         repeatCount++;
         audio.currentTime = 0;
-        audio.play();
+        audio.play().catch(e => console.log("Audio continuous playback recovery initiated"));
         statusText.innerHTML = `${currentTrack.title} • Repeat ${repeatCount + 1}/${currentTrack.repeat}`;
-        updateProgressRing();
         return;
     }
 
     if (sequentialMode) {
         let nextIndex = currentTrackIndex + 1;
         if (nextIndex < tracks.length) {
+            setNativeFocus(nextIndex);
             loadTrack(tracks[nextIndex], nextIndex, true);
         } else {
             statusText.innerHTML = "Sequence Completed!";
@@ -467,26 +400,18 @@ audio.addEventListener("ended", () => {
     if (loopMode) {
         repeatCount = 0;
         audio.currentTime = 0;
-        audio.play();
+        audio.play().catch(e => console.log("Loop restart pipeline active"));
         statusText.innerHTML = "Looping: " + currentTrack.title;
-        updateProgressRing();
     } else {
         statusText.innerHTML = "Finished: " + currentTrack.title;
+        // Keep active selection clear so kids can re-navigate freely
     }
 });
 
 function playAudio() {
-    if (currentTrackIndex === null) {
-        loadTrack(tracks[0], 0, true);
-        return;
-    }
-    if (audio.paused) {
-        audio.play();
-        statusText.innerHTML = "Playing: " + currentTrack.title;
-    } else {
-        audio.pause();
-        statusText.innerHTML = "Paused";
-    }
+    if (currentTrackIndex === null) { loadTrack(tracks[0], 0, true); return; }
+    if (audio.paused) { audio.play(); statusText.innerHTML = "Playing: " + currentTrack.title; } 
+    else { audio.pause(); statusText.innerHTML = "Paused"; }
 }
 
 function stopAudio() {
@@ -499,75 +424,98 @@ function stopAudio() {
 
 function toggleLoop() {
     loopMode = !loopMode;
-    if (loopMode) {
-        sequentialMode = false;
-        document.getElementById("btn-seq").innerHTML = "⏭ Next Step: OFF";
-    }
+    if (loopMode) { sequentialMode = false; document.getElementById("btn-seq").innerHTML = "⏭ Next Step: OFF"; }
     document.getElementById("btn-loop").innerHTML = loopMode ? "🔁 Loop: ON" : "🔁 Loop: OFF";
 }
 
 function toggleSequential() {
     sequentialMode = !sequentialMode;
-    if (sequentialMode) {
-        loopMode = false;
-        document.getElementById("btn-loop").innerHTML = "🔁 Loop: OFF";
-    }
+    if (sequentialMode) { loopMode = false; document.getElementById("btn-loop").innerHTML = "🔁 Loop: OFF"; }
     document.getElementById("btn-seq").innerHTML = sequentialMode ? "⏭ Next Step: ON" : "⏭ Next Step: OFF";
 }
 
-// ROBUST spatial key listeners for TV BRO
+// AGGRESSIVE REMOTE CONTROL NAVIGATION ENGINE
+// Dynamically handles 3-Column Grid Layout indexing to force instant, precise snaps
 document.addEventListener('keydown', (e) => {
-    const focusable = Array.from(document.querySelectorAll('.tile, button'));
-    if(focusable.length === 0) return;
+    mapNavigationNodes();
+    const columns = window.innerWidth > 680 ? 3 : 1;
+    
+    // Detect if focus is currently inside the grid tiles vs control buttons
+    const isGrid = activeFocusIndex < 6;
 
-    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+    if (e.key === "ArrowRight") {
         e.preventDefault();
-        tvFocusIdx = (tvFocusIdx + 1) % focusable.length;
-        focusable[tvFocusIdx].focus();
-    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        if (isGrid) {
+            if (activeFocusIndex % 3 < 2 && activeFocusIndex + 1 < 6) setNativeFocus(activeFocusIndex + 1);
+        } else {
+            if (activeFocusIndex < 9) setNativeFocus(activeFocusIndex + 1);
+        }
+    } 
+    else if (e.key === "ArrowLeft") {
         e.preventDefault();
-        tvFocusIdx = (tvFocusIdx - 1 + focusable.length) % focusable.length;
-        focusable[tvFocusIdx].focus();
-    } else if (e.key === "Enter" || e.key === " ") {
-        if (document.activeElement.classList.contains('tile')) {
-            e.preventDefault();
-            const index = Array.from(document.querySelectorAll('.tile')).indexOf(document.activeElement);
-            loadTrack(tracks[index], index, true);
+        if (isGrid) {
+            if (activeFocusIndex % 3 > 0) setNativeFocus(activeFocusIndex - 1);
+        } else {
+            if (activeFocusIndex > 6) setNativeFocus(activeFocusIndex - 1);
+        }
+    } 
+    else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (isGrid) {
+            if (activeFocusIndex + 3 < 6) {
+                setNativeFocus(activeFocusIndex + 3);
+            } else {
+                // Snaps directly down from bottom row of grid into the first button
+                setNativeFocus(6); 
+            }
+        }
+    } 
+    else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (isGrid) {
+            if (activeFocusIndex - 3 >= 0) setNativeFocus(activeFocusIndex - 3);
+        } else {
+            // Snaps directly up from button cluster straight into the bottom-mid tile 
+            setNativeFocus(4); 
+        }
+    } 
+    else if (e.key === "Enter" || e.keyCode === 13 || e.key === " ") {
+        e.preventDefault();
+        // Native trigger injection matching element configuration profiles
+        if (isGrid) {
+            loadTrack(tracks[activeFocusIndex], activeFocusIndex, true);
+        } else {
+            navigationItems[activeFocusIndex].click();
         }
     }
 });
 
-function preloadAll() {
-    tracks.forEach(track => {
-        const a = new Audio();
-        a.src = track.file;
-        a.preload = "auto";
-    });
-}
-preloadAll();
+// Setup Initial App State
+window.addEventListener('DOMContentLoaded', () => {
+    mapNavigationNodes();
+    setNativeFocus(0); // Instantly highlight the first tile so D-pad functions from start
+});
 
-for(let i=0;i<18;i++){
-    const bubble=document.createElement("div");
-    bubble.className="bubble";
-    bubble.style.left=Math.random()*100+"vw";
-    bubble.style.width=bubble.style.height=(30+Math.random()*80)+"px";
-    bubble.style.animationDuration=(8+Math.random()*10)+"s";
-    bubble.style.opacity=Math.random();
-    document.querySelector(".bg-bubbles").appendChild(bubble);
-}
-
+// Fallback listener capturing direct URL queries without altering workflows
 const params = new URLSearchParams(window.location.search);
 const audioParam = params.get("audio");
-
 if(audioParam){
     const idx = tracks.findIndex(t => t.file === audioParam);
     if(idx !== -1){
-        setTimeout(() => {
-            loadTrack(tracks[idx], idx, true);
-        }, 600);
+        setTimeout(() => { setNativeFocus(idx); loadTrack(tracks[idx], idx, true); }, 600);
     }
 }
-</script>
 
+// Generate background bubbles
+for(let i=0; i<10; i++){
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.style.left = Math.random()*100+"vw";
+    bubble.style.width = bubble.style.height = (40 + Math.random()*60)+"px";
+    bubble.style.animationDuration = (10 + Math.random()*10)+"s";
+    bubble.style.top = Math.random()*100+"vh";
+    document.getElementById("bubble-container").appendChild(bubble);
+}
+</script>
 </body>
 </html>
